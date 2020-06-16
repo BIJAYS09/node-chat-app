@@ -9,10 +9,10 @@ socket.on('connect',function () {
     //     text:"Hello from Client Side"
     // });
 
-    socket.emit('createMessage',{
-        to:'ClientToServer@gmail.com',
-        text:'Hello from Client'
-    });
+    // socket.emit('createMessage',{
+    //     to:'ClientToServer@gmail.com',
+    //     text:'Hello from Client'
+    // });
 });
 socket.on('disconnect',function () {
     console.log('Disconnect from server');

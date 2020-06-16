@@ -25,14 +25,19 @@ io.on('connection',(socket)=>{
     //     console.log('create Email',newEmail);
     // })
 
-    socket.emit('newMessage',{
-        from:'ServerToClient@gmail.com',
-        text:'Hello from server',
-        createdAt: new Date().getTime()
-    })
+    // socket.emit('newMessage',{
+    //     from:'ServerToClient@gmail.com',
+    //     text:'Hello from server',
+    //     createdAt: new Date().getTime()
+    // })
 
     socket.on('createMessage',(message)=>{
         console.log('create message',message);
+        io.emit('newMessage',{
+            from: message.from,
+            text: message.text,
+            createdaAt: new Date().getTime()
+        });
     });
 
     socket.on('disconnect',()=>{
