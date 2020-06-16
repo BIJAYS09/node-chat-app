@@ -3,6 +3,7 @@ const express = require('express');
 const socketIO = require('socket.io');
 const http = require('http');
 
+const {generateMessage} = require('./utils/message');
 const publicPath = path.join(__dirname,'/../public');
 
 const PORT = process.env.PORT || 3000;;
@@ -25,19 +26,18 @@ io.on('connection',(socket)=>{
     //     console.log('create Email',newEmail);
     // })
 
-    // socket.emit('newMessage',{
-    //     from:'ServerToClient@gmail.com',
-    //     text:'Hello from server',
-    //     createdAt: new Date().getTime()
-    // })
+    socket.emit('newMessage',generateMessage('Admin','Welcome to chat app'));
 
-    socket.on('createMessage',(message)=>{
+    socket.broadcast.emit('newMessage',generateMessage('Admin','New user joined'));
+
+    socket.on('createMessage',(message, callback)=>{
         console.log('create message',message);
-        io.emit('newMessage',{
-            from: message.from,
-            text: message.text,
-            createdaAt: new Date().getTime()
-        });
+
+        io.emit('newMessage',generateMessage(message.from,message.text));
+        callback('This is from server');
+
+        //socket.broadcast.emit('newMessage',generateMessage(message.from, message.text));
+
     });
 
     socket.on('disconnect',()=>{
