@@ -1,8 +1,34 @@
 
 var socket = io();
 
+function scrollToBottom () {
+    var messages = jQuery('#messages');
+    var newMessage = messages.children('li:last-child');
+
+    var clientHeight = messages.prop('clientHeight');
+    var scrollHeight = messages.prop('scrollHeight');
+    var scrollTop = messages.prop('scrollTop');
+    var newMessageHeight =  messages.innerHeight();
+    var lastMessageHeight = messages.prev().innerHeight();
+
+    if(clientHeight + scrollTop + newMessage + lastMessageHeight >= scrollHeight) {
+        //console.log('should scroll');
+        messages.scrollTop(scrollHeight);
+    }
+}
+
 socket.on('connect',function () {
-    console.log('Connected to server');
+    //console.log('Connected to server');
+    var params = jQuery.deparam(window.location.search);
+
+    socket.emit('join',params,function (err) {
+        if(err){
+            alert(err);
+            window.location.href = '/';
+        }else{
+            console.log('No errror');
+        }
+    });
 });
 
 socket.on('disconnect',function () {
@@ -29,16 +55,18 @@ socket.on('newMessage',function(message){
         from: message.from,
         createdAt: formattedTime
     });
-
     jQuery('#messages').append(html);
+    scrollToBottom();
 });
 
-// socket.emit('createMessage',{
-//     from:"User",
-//     text:"Hello Boss"
-// }, function (data) {
-//     console.log('Call back from server', data);
-// });
+socket.on('updateUserList', function (users) {
+   // console.log('Users',users); 
+   var ol = jQuery('<ol></ol>');
+   users.forEach(function(user){
+       ol.append(jQuery('<li></li>').text(user));
+   });
+   jQuery('#users').html(ol);
+});
 
 socket.on('newLocationMessage',function(message) {
     var formattedTime = moment(message.createdAt).format('h:mm a');
@@ -56,13 +84,13 @@ socket.on('newLocationMessage',function(message) {
         createdAt: formattedTime
     });
     jQuery('#messages').append(html);
+    scrollToBottom();
 });
 
 jQuery('#message-form').on('submit', function (e) {
     e.preventDefault();
     var messageTextBox = jQuery('[name=message]');
     socket.emit('createMessage', {
-        from: 'User',
         text: messageTextBox.val()
     }, function () {
         messageTextBox.val('');
